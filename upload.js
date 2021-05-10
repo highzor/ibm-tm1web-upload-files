@@ -44,6 +44,7 @@ function ready() {
     }
 
     // 1.
+    //test branch
     document.body.addEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
 
 }
