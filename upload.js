@@ -15,6 +15,7 @@ function ready() {
         let modalWindow = document.getElementsByClassName('dijitDialogPaneContent')[0];
         let modalWindowType = modalWindow ? modalWindow.children[0] ? modalWindow.children[0].type : undefined : undefined;
         let modalWindowClass = modalWindow ? modalWindow.children[0] ? modalWindow.children[0].classList[0] : undefined : undefined;
+        let btnPrimary = document.getElementsByClassName('tm1WebBtnPrimary')[0];
 
         if (event.type == 'DOMNodeInserted' && modalWindow) {
 
@@ -29,12 +30,12 @@ function ready() {
             document.body.addEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
             document.body.removeEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
         }
-        if (event.type == 'DOMNodeInserted' && modalWindowType == 'textarea') {
+        if (event.type == 'DOMNodeInserted' && modalWindowType == 'textarea' && btnPrimary) {
 
             console.log('textArea event');
             document.body.removeEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
             document.body.addEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
-            insertDropezone(modalWindow);
+            insertDropezone(modalWindow, btnPrimary);
         }
         else if (event.type == 'DOMNodeInserted' && modalWindowClass == 'tm1WebAnotationGridContainer') {
             console.log('filesList event');
@@ -44,7 +45,6 @@ function ready() {
     }
 
     // 1.
-    //test branch
     document.body.addEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
 
 }

@@ -1,12 +1,14 @@
-function insertDropezone(modalWindow) {
+function insertDropezone(modalWindow, btnPrimary) {
+    console.log('функция insertDropezone');
     let iframe = createGetIframe();
     document.body.addEventListener("DOMNodeRemoved", removeUploadListener, false);
     modalWindow.appendChild(iframe);
-    setUploadListener();
+    setUploadListener(btnPrimary);
 }
 
-function setUploadListener() {
-    window.addEventListener("message", uploadListener);
+function setUploadListener(btnPrimary) {
+    window.addEventListener("message", uploadListener.bind(null, btnPrimary));
+    btnPrimary.onclick = onClickBtnPrimaryHandler.bind(null, btnPrimary);
     console.log('событие на сообщение установлено');
 }
 
@@ -18,8 +20,7 @@ function removeUploadListener() {
     console.log('событие на сообщение удалено');
 }
 
-function uploadListener(event) {
-    let btnPrimary = document.getElementsByClassName('tm1WebBtnPrimary')[0];
+function uploadListener(btnPrimary, event) {
     if (event.data == 'uploading') {
         btnPrimary.className = `dijit dijitReset dijitInline tm1webButton tm1WebBtnPrimary dijitButton
          dijitButtonDisabled dijitDisabled dijitButtonFocused dijitButtonDisabledFocused dijitDisabledFocused dijitFocused`;
@@ -35,7 +36,10 @@ function uploadListener(event) {
     }
 }
 
-
+function onClickBtnPrimaryHandler(btnPrimary) {
+    btnPrimary.onclick = null;
+    console.log('нажата кнопка ОК');
+}
 
 function createGetIframe() {
 
