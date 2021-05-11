@@ -1,48 +1,54 @@
-function insertDropezone(modalWindow) {
-    let iframe = createGetIframe();
+function insertDropezone(modalWindow, btnPrimary) {
+    console.log('функция insertDropezone');
+    const iframe = createGetIframe();
     document.body.addEventListener("DOMNodeRemoved", removeUploadListener, false);
     modalWindow.appendChild(iframe);
-    setUploadListener();
+    setUploadListener(btnPrimary);
 }
 
-function setUploadListener() {
-    window.addEventListener("message", uploadListener);
+function setUploadListener(btnPrimary) {
+    window.addEventListener("message", onMessageUploadListener.bind(null, btnPrimary));
+    btnPrimary.onclick = onClickBtnPrimaryHandler.bind(null, btnPrimary);
     console.log('событие на сообщение установлено');
 }
 
 function removeUploadListener() {
-    let modalWindow = document.getElementsByClassName('dijitDialogPaneContent')[0];
+    const modalWindow = document.getElementsByClassName('dijitDialogPaneContent')[0];
     if (modalWindow) return;
-    window.removeEventListener("message", uploadListener);
+    window.removeEventListener("message", onMessageUploadListener);
     document.body.removeEventListener("DOMNodeRemoved", removeUploadListener, false);
     console.log('событие на сообщение удалено');
 }
 
-function uploadListener(event) {
-    let btnPrimary = document.getElementsByClassName('tm1WebBtnPrimary')[0];
+function onMessageUploadListener(btnPrimary, event) {
     if (event.data == 'uploading') {
         btnPrimary.className = `dijit dijitReset dijitInline tm1webButton tm1WebBtnPrimary dijitButton
          dijitButtonDisabled dijitDisabled dijitButtonFocused dijitButtonDisabledFocused dijitDisabledFocused dijitFocused`;
     }
-    else if (event.data.indexOf("setImmediate") !== 0) {
+    else if (event.data.includes('Attachments')) {
         btnPrimary.className = `dijit dijitReset dijitInline tm1webButton tm1WebBtnPrimary dijitButton`;
-        let attachmentText = event.data;
+        const attachmentText = event.data;
         console.log(attachmentText);
     }
     else {
         btnPrimary.className = `dijit dijitReset dijitInline tm1webButton tm1WebBtnPrimary dijitButton`;
-        alert(event.data);
     }
 }
 
-
+function onClickBtnPrimaryHandler(btnPrimary) {
+    btnPrimary.onclick = null;
+    console.log('нажата кнопка ОК');
+    const textrareaId = $('.tm1webAddAnnotationDialog').find('textarea').attr('id');
+    const annotationDialogId = document.getElementById(textrareaId);
+    let annotationDialogText = annotationDialogId.value;
+}
 
 function createGetIframe() {
 
-    let currentDate = new Date();
-    let formname = $('.dijitTabInner.dijitTabContent.dijitClosable.dijitTab.dijitTabChecked.dijitChecked').find($('.dijitTabLabel')).attr("title").split(': ').pop();
+    const currentDate = new Date();
+    const formname = $('.dijitTabInner.dijitTabContent.dijitClosable.dijitTab.dijitTabChecked.dijitChecked').find($('.dijitTabLabel')).attr("title").split(': ').pop();
 
-    let iframe = document.createElement('iframe');
+    const iframe = document.createElement('iframe');
     iframe.style.border = '0px';
     iframe.style.height = '130px';
     iframe.style.marginBottom = '24px';
@@ -52,4 +58,4 @@ function createGetIframe() {
     return iframe;
 }
 
-export { insertDropezone };
+export { insertDropezone }
