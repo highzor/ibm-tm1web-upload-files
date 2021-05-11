@@ -10,10 +10,10 @@ const currentDate = queryStringParams['currentDate'];
 Dropzone.autoDiscover = false;
 $(function () {
     const myDropzone = new Dropzone(".dropzone");
-    let attachments = false;
+    //let attachments = false;
     myDropzone.on('sending', function (file, xhr, formData) {
         formData.append('serverName', serverName);
-        formData.append('formame', formname);
+        formData.append('forname', formname);
         formData.append('currentDate', currentDate);
         parent.postMessage('uploading', window.parent.location.href);
     });
@@ -22,13 +22,15 @@ $(function () {
     });
     myDropzone.on("success", function (file, response) {
         response = JSON.parse(response);
-        if (!attachments) {
-            attachmentText += '\n\rAttachments:';
-            attachments = true;
-        }
+        // if (!attachments) {
+        //     attachmentText += '\n\rAttachments:';
+        //     attachments = true;
+        // }
 
-        attachmentText += '\n' + '!. . . .!' + response['name'] + '!-. . . .! ' + response['name'] + ' (' + response['size'] + ')' + latin;
-        parent.postMessage(attachmentText, window.parent.location.href);
+        //attachmentText += '\n\rAttachments:' + '\n' + '!. . . .!' + response['name'] + '!-. . . .! ' + response['name'] + ' (' + response['size'] + ')' + latin;
+        if (sessionStorage.attachments) delete sessionStorage.attachments;
+        sessionStorage.setItem('attachments', ` Attachments: !. . . .!${response['name']}!-. . . .! ${response['name']}(${response['size']}${latin})`);
+        parent.postMessage('complete', window.parent.location.href);
     });
 });
 

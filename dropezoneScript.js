@@ -25,10 +25,8 @@ function onMessageUploadListener(btnPrimary, event) {
         btnPrimary.className = `dijit dijitReset dijitInline tm1webButton tm1WebBtnPrimary dijitButton
          dijitButtonDisabled dijitDisabled dijitButtonFocused dijitButtonDisabledFocused dijitDisabledFocused dijitFocused`;
     }
-    else if (event.data.includes('Attachments')) {
+    else if (event.data == 'complete') {
         btnPrimary.className = `dijit dijitReset dijitInline tm1webButton tm1WebBtnPrimary dijitButton`;
-        const attachmentText = event.data;
-        console.log(attachmentText);
     }
     else {
         btnPrimary.className = `dijit dijitReset dijitInline tm1webButton tm1WebBtnPrimary dijitButton`;
@@ -37,10 +35,16 @@ function onMessageUploadListener(btnPrimary, event) {
 
 function onClickBtnPrimaryHandler(btnPrimary) {
     btnPrimary.onclick = null;
+    let fileName = '';
     console.log('нажата кнопка ОК');
     const textrareaId = $('.tm1webAddAnnotationDialog').find('textarea').attr('id');
-    const annotationDialogId = document.getElementById(textrareaId);
-    let annotationDialogText = annotationDialogId.value;
+    const annotationDialog = document.getElementById(textrareaId);
+    if (sessionStorage.attachments) fileName = sessionStorage.attachments;
+    annotationDialog.value = `${annotationDialog.value}${sessionStorage.attachments}`;
+    // require(['dojo','dijit'], function (dojo, dijit) {
+    //         dijit.byId(textrareaId).setValue(annotationDialogText);
+    // });
+    delete sessionStorage.attachments;
 }
 
 function createGetIframe() {
