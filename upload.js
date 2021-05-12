@@ -15,7 +15,8 @@ function ready() {
         const modalWindow = document.getElementsByClassName('dijitDialogPaneContent')[0];
         const modalWindowType = modalWindow ? modalWindow.children[0] ? modalWindow.children[0].type : undefined : undefined;
         const modalWindowClass = modalWindow ? modalWindow.children[0] ? modalWindow.children[0].classList[0] : undefined : undefined;
-        const btnPrimary = document.getElementsByClassName('tm1WebBtnPrimary')[0];
+        const id = $('.tm1WebBtnPrimary').children('span').children('span').attr('id');
+        const btnPrimary = document.getElementById(id);
 
         // if (event.type == 'DOMNodeInserted' && modalWindow) {
 
