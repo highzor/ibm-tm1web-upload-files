@@ -32,13 +32,14 @@ function ready() {
             document.body.addEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
             insertDropezone(modalWindow, btnPrimary);
         }
-        if (event.type == 'DOMNodeRemoved' && !modalWindow) {
+        else if (event.type == 'DOMNodeRemoved' && !modalWindow) {
 
             console.log('remove event');
             document.body.addEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
             document.body.removeEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
         }
         else if (event.type == 'DOMNodeInserted' && modalWindowClass == 'tm1WebAnotationGridContainer') {
+            
             console.log('filesList event');
             document.body.removeEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
             document.body.addEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
