@@ -1,4 +1,5 @@
 import {insertDropezone} from './dropezoneScript.js';
+import {replaceComment} from './replaceCommentScript.js';
 
 document.addEventListener("DOMContentLoaded", ready);
 
@@ -43,6 +44,7 @@ function ready() {
             console.log('filesList event');
             document.body.removeEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
             document.body.addEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
+            replaceComment();
         }
     }
 
