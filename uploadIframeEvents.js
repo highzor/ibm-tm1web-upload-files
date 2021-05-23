@@ -29,7 +29,7 @@ $(function () {
 
         //attachmentText += '\n\rAttachments:' + '\n' + '!. . . .!' + response['name'] + '!-. . . .! ' + response['name'] + ' (' + response['size'] + ')' + latin;
         if (sessionStorage.attachments) delete sessionStorage.attachments;
-        sessionStorage.setItem('attachments', ` Attachments: !. . . .!${response['name']}!-. . . .! ${response['name']}(${response['size']}${latin})`);
+        sessionStorage.setItem('attachments', ` Attachments: !. . . .!${response['name']}!-. . . .! ${response['name']}(${response['size']})${latin}`);
         parent.postMessage('complete', window.parent.location.href);
     });
 });

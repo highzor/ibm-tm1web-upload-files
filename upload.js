@@ -1,5 +1,5 @@
 import {insertDropezone} from './dropezoneScript.js';
-import {replaceComment} from './replaceCommentScript.js';
+import {replaceComments} from './replaceCommentScript.js';
 
 document.addEventListener("DOMContentLoaded", ready);
 
@@ -18,6 +18,7 @@ function ready() {
         const modalWindowClass = modalWindow ? modalWindow.children[0] ? modalWindow.children[0].classList[0] : undefined : undefined;
         const id = $('.tm1WebBtnPrimary').children('span').children('span').attr('id');
         const btnPrimary = document.getElementById(id);
+        const gridContent = document.getElementsByClassName('dojoxGridContent')[0];
 
         // if (event.type == 'DOMNodeInserted' && modalWindow) {
 
@@ -39,12 +40,12 @@ function ready() {
             document.body.addEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
             document.body.removeEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
         }
-        else if (event.type == 'DOMNodeInserted' && modalWindowClass == 'tm1WebAnotationGridContainer') {
+        else if (event.type == 'DOMNodeInserted' && modalWindowClass == 'tm1WebAnotationGridContainer' && gridContent) {
             
             console.log('filesList event');
             document.body.removeEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
             document.body.addEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
-            replaceComment();
+            replaceComments(gridContent);
         }
     }
 
