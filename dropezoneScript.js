@@ -44,7 +44,7 @@ function onClickBtnPrimaryHandler(btnPrimary, btnPrimaryClass) {
     if (sessionStorage.attachments) fileName = sessionStorage.attachments;
 
     require(['dojo','dijit'], function (dojo, dijit) {
-            dijit.byId(textrareaId).setValue(`${annotationDialogValue}${fileName}`);
+        dijit.byId(textrareaId).setValue(`${annotationDialogValue}${fileName}`);
     });
     delete sessionStorage.attachments;
 }
