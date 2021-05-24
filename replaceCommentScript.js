@@ -14,11 +14,9 @@ function InsertPresentationRoleElemHandler() {
 
 function replaceTable() {
     let lastPresentationElem = document.getElementsByClassName('dojoxGridContent')[0].lastElementChild;
-    let fileName = 'package-lock.json';
-    let serverName = 'Rosseti_DUS';
-    let formname = 'ОФК_01';
+    const formname = $('.dijitTabInner.dijitTabContent.dijitClosable.dijitTab.dijitTabChecked.dijitChecked').find($('.dijitTabLabel') ).attr("title").split(': ').pop();
     var settings = {
-        "url": `/tm1web/upload/app/createTable.jsp?fileName=${fileName}&serverName=${serverName}&formname=${formname}`,
+        "url": `/tm1web/upload/app/createTable.jsp?serverName=${serverName}&formname=${formname}`,
         "method": "POST",
         "timeout": 0,
         "headers": {
@@ -29,8 +27,10 @@ function replaceTable() {
 
       $.ajax(settings).done(function (response) {
         const gridContent = document.getElementsByClassName('dojoxGridContent')[0];
+        let lastPresentationElem = document.getElementsByClassName('dojoxGridContent')[0].lastElementChild;
+        lastPresentationElem.innerHTML = response;
         gridContent.addEventListener("DOMNodeInserted", InsertPresentationRoleElemHandler, false);
-        console.log(response);
+        console.log(finish);
       });
 }
 

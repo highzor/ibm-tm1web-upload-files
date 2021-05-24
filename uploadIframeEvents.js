@@ -13,7 +13,7 @@ $(function () {
     //let attachments = false;
     myDropzone.on('sending', function (file, xhr, formData) {
         formData.append('serverName', serverName);
-        formData.append('forname', formname);
+        formData.append('formname', formname);
         formData.append('currentDate', currentDate);
         parent.postMessage('uploading', window.parent.location.href);
     });
@@ -37,7 +37,7 @@ $(function () {
 function getUriSearchDataParams() {
     const search = window.location.search;
     const decodedSearchWithoutData = decodeURIComponent(search.replace('?', ''));
-    const hashes = decodedSearchWithoutData.slice(search.indexOf('?') + 1).split('&')
+    const hashes = decodedSearchWithoutData.slice(search.indexOf('?')).split('&')
     const params = {}
 
     hashes.map(hash => {
