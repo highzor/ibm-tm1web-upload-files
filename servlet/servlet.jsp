@@ -18,6 +18,7 @@
         request.setCharacterEncoding("UTF-8");
         String serverName = request.getParameter("serverName");
         String formname = request.getParameter("formname");
+        String user = request.getParameter("user");
         String bodyRequest = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
         if (serverName != null && formname != null) {
         	//Document doc = Jsoup.parse(subject);
@@ -34,7 +35,7 @@
         		if (td.text().lastIndexOf("!-. . . .!") != -1) {
         			//out.println(element.text());
         			
-        		    replacedElement.getReplacedCell(td, serverName, formname);
+        		    replacedElement.getReplacedCell(td, serverName, formname, user);
         		}
         		//el.text("hello " + i);
         		//i++;
@@ -52,30 +53,33 @@
         
         <%!
         public class ReplaceHelper {
-        	public String sayHello() {
-        		return "helloFromClass";
-        	}
         	//Step 1
-        	public void getReplacedCell(Element td, String serverName, String formname) throws Exception {
-        		DocumentDTO document = new DocumentDTO();
-        		document.serverName = serverName;
-        		document.formname = formname;
+        	public void getReplacedCell(Element td, String serverName, String formname, String user) throws Exception {
+        		
+        		DocumentDTO document = new DocumentDTO(serverName, formname, user);
         		String cellValue = td.text();
         		explodeCellValue(document, cellValue);
         		boolean isExist = isFileExist(document);
         		if (isExist) {
-        			replaceCell(td, document);
+        			replaceCellForDownloadAndDelete(td, document);
         		}
         	}
         	
         }
        
         public class DocumentDTO {
-        	String serverName;
-        	String formname;
-        	String fileName;
-        	String fileNameAndSize;
+        	String ServerName;
+        	String Formname;
+        	String FileName;
+        	String FileNameAndSize;
         	String Message;
+        	String User;
+        	
+        	public DocumentDTO(String serverName, String formname, String user) {
+        		this.ServerName = serverName;
+        		this.Formname = formname;
+        		this.User = user;
+        	}
         }
         
       //Step 2
@@ -84,9 +88,11 @@
 			String[] array2 = array[0].split("!-. . . .!");
 			String[] array3 = array2[0].split("!. . . .!");
 			String[] array4 = array3[0].split("Attachments:");
-			document.fileNameAndSize = array2[1].trim();
-			document.fileName = array3[1].trim();
+			
+			document.FileNameAndSize = array2[1].trim();
+			document.FileName = array3[1].trim();
 			document.Message = array4[0].trim();
+			
     		return document;
     	}
       
@@ -98,7 +104,7 @@
             org.w3c.dom.Document doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
             String configPath = doc.getElementsByTagName("Path").item(0).getTextContent();
-            String filePath = configPath + document.serverName + "\\" + document.formname + "\\attachments\\" + document.fileName;
+            String filePath = configPath + document.ServerName + "\\" + document.Formname + "\\attachments\\" + document.FileName;
             File file = new File(filePath);
             if(file.exists() && !file.isDirectory()) {
                 return true;
@@ -107,23 +113,45 @@
     	}
       
       //Step 4
-        public static void replaceCell(Element td, DocumentDTO document) throws Exception {
-        	StringBuffer url = new StringBuffer("/tm1web/upload/app/getfile.jsp?");
-        	url.append("fileName=" + encodeValue(document.fileName));
-        	url.append("&");
-        	url.append("serverName=" + encodeValue(document.serverName));
-        	url.append("&");
-        	url.append("formname=" + encodeValue(document.formname));
+        public static void replaceCellForDownloadAndDelete(Element td, DocumentDTO document) throws Exception {
+        	StringBuffer urlDownload = new StringBuffer("/tm1web/upload/app/getfile.jsp?");
+        	StringBuffer urlRemove = new StringBuffer("/tm1web/upload/app/remove.jsp?");
+        	StringBuffer urlParameters = new StringBuffer();
+        	
+        	urlParameters.append("fileName=" + encodeValue(document.FileName));
+        	urlParameters.append("&");
+        	urlParameters.append("serverName=" + encodeValue(document.ServerName));
+        	urlParameters.append("&");
+        	urlParameters.append("formname=" + encodeValue(document.Formname));
+        	urlParameters.append("&");
+        	urlParameters.append("user=" + encodeValue(document.User));
+        	
+        	urlDownload.append(urlParameters);
+        	urlRemove.append(urlParameters);
+        	
     		Element span = new Element("span");
     		Element br = new Element("br");
-    		Element a = new Element("a");
-    		a.attr("id", "downloadButton");
-    		a.attr("href", url.toString());
-    		a.attr("target", "_blank");
-    		a.text("Скачать");
-    		span.attr("data-filename-log", document.fileName);
+    		Element downloadLinkElement = new Element("a");
+    		Element removeLinkElement = new Element("a");
+    		
+    		downloadLinkElement.attr("id", "downloadButton");
+    		downloadLinkElement.attr("href", urlDownload.toString());
+    		downloadLinkElement.attr("target", "_blank");
+    		downloadLinkElement.text("Скачать");
+    		
+    		removeLinkElement.attr("id", "removeButton");
+    		removeLinkElement.attr("href", urlRemove.toString());
+    		removeLinkElement.attr("target", "_blank");
+    		removeLinkElement.attr("style", "color:red");
+    		removeLinkElement.text("x Удалить");
+    		
+    		span.attr("data-filename-log", document.FileName);
     		span.appendChild(br);
-    		span.appendChild(a);
+    		span.appendChild(downloadLinkElement);
+    		span.appendText(" (");
+    		span.appendChild(removeLinkElement);
+    		span.appendText(") " + document.FileNameAndSize);
+    		
     		td.text(document.Message);
     		td.appendChild(span);
     	}
