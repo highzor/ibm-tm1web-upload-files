@@ -13,12 +13,13 @@ function InsertPresentationRoleElemHandler() {
 }
 
 function replaceTable() {
+  const user = getUserName();
+  const scrollBoxTurnOff = document.getElementsByClassName('dojoxGridScrollbox')[0];
+  scrollBoxTurnOff.style.overflow = 'hidden';
     let lastPresentationElem = document.getElementsByClassName('dojoxGridContent')[0].lastElementChild;
-    let fileName = 'package-lock.json';
-    let serverName = 'Rosseti_DUS';
-    let formname = 'ОФК_01';
+    const formname = $('.dijitTabInner.dijitTabContent.dijitClosable.dijitTab.dijitTabChecked.dijitChecked').find($('.dijitTabLabel') ).attr("title").split(': ').pop();
     var settings = {
-        "url": `/tm1web/upload/app/createTable.jsp?fileName=${fileName}&serverName=${serverName}&formname=${formname}`,
+        "url": `/tm1web/upload/app/createTable.jsp?serverName=${serverName}&formname=${formname}&user=${user}`,
         "method": "POST",
         "timeout": 0,
         "headers": {
@@ -28,10 +29,17 @@ function replaceTable() {
       };
 
       $.ajax(settings).done(function (response) {
+        scrollBoxTurnOff.style.overflow = 'auto';
         const gridContent = document.getElementsByClassName('dojoxGridContent')[0];
+        let lastPresentationElem = document.getElementsByClassName('dojoxGridContent')[0].lastElementChild;
+        lastPresentationElem.innerHTML = response;
         gridContent.addEventListener("DOMNodeInserted", InsertPresentationRoleElemHandler, false);
-        console.log(response);
       });
+}
+
+function getUserName() {
+    const userName = $('#ibm-banner-welcome').text();
+    return userName;
 }
 
 export { replaceComments }
