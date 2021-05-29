@@ -29,6 +29,7 @@ if (serverName != null && formname != null) {
 	//out.println(bodyRequest);
 	Document doc = Jsoup.parse(bodyRequest);
 	ReplaceHelper replacedElement = new ReplaceHelper();
+	String rootPath = getRootPath(serverName, formname);
 	//out.println(doc);
 	//Element table = doc.select("table[class=dojoxGridRowTable]").first();
 	Elements tds = doc.select("td[idx=0]");
@@ -36,7 +37,7 @@ if (serverName != null && formname != null) {
 		if (td.text().lastIndexOf("!-. . . .!") != -1) {
 	//out.println(element.text());
 
-	replacedElement.getReplacedCell(td, serverName, formname, user);
+	replacedElement.getReplacedCell(td, serverName, formname, rootPath, user);
 		}
 		//el.text("hello " + i);
 		//i++;
@@ -44,24 +45,23 @@ if (serverName != null && formname != null) {
 
 	//out.println(td);
 	out.print(doc);
+	out.flush();
 }
-// for(String person: people){
-//    out.println("<li>" + person + "</li>");
-//}
 %>
 
 <%!public class ReplaceHelper {
 		//Step 1
-		public void getReplacedCell(Element td, String serverName, String formname, String user) throws Exception {
+		public void getReplacedCell(Element td, String serverName, String formname, String rootPath, String user)
+				throws Exception {
 
 			DocumentDTO document = new DocumentDTO(serverName, formname, user);
 			String cellValue = td.text();
 			explodeCellValue(document, cellValue);
-			boolean isExist = isFileExist(document);
+			boolean isExist = isFileExist(document, rootPath);
 			if (isExist) {
 				replaceDownloadAndDeleteCell(td, document);
 			} else {
-				replaceDeletedCell(td, document);
+				replaceDeletedCell(td, document, rootPath);
 			}
 		}
 
@@ -82,8 +82,8 @@ if (serverName != null && formname != null) {
 	}
 
 	//Step 3
-	public static boolean isFileExist(DocumentDTO document) throws Exception {
-		StringBuffer filePath = new StringBuffer(getFilePath(document));
+	public static boolean isFileExist(DocumentDTO document, String rootPath) throws Exception {
+		StringBuffer filePath = new StringBuffer(rootPath);
 		filePath.append(document.FileName);
 		File file = new File(filePath.toString());
 		if (file.exists() && !file.isDirectory()) {
@@ -120,10 +120,12 @@ if (serverName != null && formname != null) {
 		downloadLinkElement.text("Скачать");
 
 		removeLinkElement.attr("id", "removeButton");
-		removeLinkElement.attr("href", urlRemove.toString());
-		removeLinkElement.attr("target", "_blank");
+		removeLinkElement.attr("data-href", document.FileName);
+		//removeLinkElement.attr("target", "_blank");
+		removeLinkElement.attr("href", "javascript:;");
 		removeLinkElement.attr("style", "color:red");
-		removeLinkElement.attr("onClick", "return confirm('Вы подтверждаете удаление?');");
+		//removeLinkElement.attr("onClick", "return confirm('Вы подтверждаете удаление?');");
+		removeLinkElement.attr("onClick", "removeFile($(this));");
 		removeLinkElement.text("x Удалить");
 
 		span.attr("data-filename-log", document.FileName);
@@ -137,10 +139,32 @@ if (serverName != null && formname != null) {
 		td.appendChild(span);
 	}
 
-	public static void replaceDeletedCell(Element td, DocumentDTO document) throws Exception {
-		StringBuffer logFile = new StringBuffer(getFilePath(document));
-		logFile.append("logs\\remove.txt");
-		searchRemovedFile(logFile.toString(), document.FileName);
+	public static void replaceDeletedCell(Element td, DocumentDTO document, String rootPath) throws Exception {
+
+		User whoIsDeletedFile = searchRemovedFile(rootPath, document.FileName);
+
+		Element span = new Element("span");
+		Element spanWithInfo = new Element("span");
+		Element br = new Element("br");
+
+		spanWithInfo.attr("style", "cursor:pointer; border-bottom:1px dashed gray;");
+
+		if (whoIsDeletedFile.name != null && whoIsDeletedFile.ErrorMessage == null) {
+			spanWithInfo.attr("title", "Файл '" + whoIsDeletedFile.name + "' удален пользователем '"
+					+ whoIsDeletedFile.user + "' в '" + whoIsDeletedFile.datetime + "'");
+		} else {
+			spanWithInfo.attr("title",
+					"Файл '" + document.FileName + "' удален, дополнительная информация отсутствует");
+		}
+		spanWithInfo.appendText("Файл удален");
+
+		span.attr("data-filename-log", document.FileName);
+		span.appendChild(br);
+		span.appendChild(spanWithInfo);
+
+		td.text(document.Message);
+		td.appendChild(span);
+		td.appendText(" - " + document.FileNameAndSize);
 	}
 
 	public static String getCognosDataPath() throws Exception {
@@ -152,7 +176,7 @@ if (serverName != null && formname != null) {
 		String configPath = doc.getElementsByTagName("Path").item(0).getTextContent();
 		return configPath;
 	}
-	
+	/*
 	public static String getFilePath(DocumentDTO document) throws Exception {
 		StringBuffer filePath = new StringBuffer(getCognosDataPath());
 		filePath.append(document.ServerName);
@@ -161,44 +185,56 @@ if (serverName != null && formname != null) {
 		filePath.append("\\attachments\\");
 		return filePath.toString();
 	}
-	
-	public static String searchRemovedFile(String logFile, String searchedFileName) throws Exception {
-		
-		try {  
-			FileInputStream fis = new FileInputStream(logFile);
-			Scanner sc = new Scanner(fis);   
+	*/
+
+	public static String getRootPath(String serverName, String formname) throws Exception {
+		StringBuffer rootPath = new StringBuffer(getCognosDataPath());
+		rootPath.append(serverName);
+		rootPath.append("\\");
+		rootPath.append(formname);
+		rootPath.append("\\attachments\\");
+		return rootPath.toString();
+	}
+
+	public static User searchRemovedFile(String rootPath, String searchedFileName) throws Exception {
+		User user = new User();
+		StringBuffer logFile = new StringBuffer(rootPath);
+		logFile.append("logs\\remove.txt");
+		try {
+			FileInputStream fis = new FileInputStream(logFile.toString());
+			Scanner sc = new Scanner(fis);
+			String line;
 			while (sc.hasNextLine()) {
-				System.out.println(sc.nextLine()); 
-				if (sc.nextLine().contains(searchedFileName)) {
-					String stringToParse = removeLastChar(sc.nextLine());
+				line = sc.nextLine();
+				if (line.contains(searchedFileName)) {
+					String stringToParse = removeLastChar(line);
 					Gson gson = new Gson();
-                    User user = gson.fromJson(stringToParse, User.class);
-					System.out.println(stringToParse);
-					System.out.println(user.name);
-					System.out.println(user.user);
-					System.out.println(user.datetime);
+					user = gson.fromJson(stringToParse, User.class);
 					sc.close();
-					return sc.nextLine();
+					return user;
 				}
 			}
-			sc.close(); 
-			return "";
+			sc.close();
+			return user;
 		} catch (IOException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			user.ErrorMessage = e.getMessage();
+			return user;
 		}
 	}
-	
-	public class User {
+
+	public static class User {
 		String user;
 		String datetime;
 		String name;
-		
+		String ErrorMessage;
+		/*
 		public User(String user, String datetime, String name) {
 			this.user = user;
 			this.datetime = datetime;
 			this.name = name;
 		}
+		*/
 	}
 
 	public class DocumentDTO {
@@ -214,13 +250,13 @@ if (serverName != null && formname != null) {
 			this.Formname = formname;
 			this.User = user;
 		}
+
 	}
-	
+
 	private static String encodeValue(String value) throws Exception {
 		return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
 	}
-	
+
 	public static String removeLastChar(String s) {
-	    return (s == null || s.length() == 0) ? null : (s.substring(0, s.length() - 1));
-	}
-	%>
+		return (s == null || s.length() == 0) ? null : (s.substring(0, s.length() - 1));
+	}%>
