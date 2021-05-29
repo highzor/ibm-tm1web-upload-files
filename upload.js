@@ -1,5 +1,5 @@
 import {insertDropezone} from './dropezoneScript.js';
-import {replaceComments} from './replaceCommentScript.js';
+import {replaceComments, removeFile} from './replaceCommentScript.js';
 
 document.addEventListener("DOMContentLoaded", ready);
 
@@ -8,6 +8,9 @@ function ready() {
     const switcherEvents = (event) => {
 
     }
+
+    window.removeFile = removeFile;
+
 
     // 2.
     const InsertOrDeleteDomElemEventHandler = (event) => {
