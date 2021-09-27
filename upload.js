@@ -25,13 +25,6 @@ function ready() {
         const gridContent = document.getElementsByClassName('dojoxGridContent')[0];
         const tm1webDialogButtons = document.getElementsByClassName('tm1webDialogButtons')[0];
 
-        // if (event.type == 'DOMNodeInserted' && modalWindow) {
-
-        //     console.log('insert event');
-        //     document.body.removeEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
-        //     document.body.addEventListener("DOMNodeRemoved", InsertOrDeleteDomElemEventHandler, false);
-        //     document.body.addEventListener("DOMNodeInserted", InsertOrDeleteDomElemEventHandler, false);
-        // }
         if (event.type == 'DOMNodeInserted' && modalWindowType == 'textarea' && btnPrimary) {
 
             console.log('textArea event');

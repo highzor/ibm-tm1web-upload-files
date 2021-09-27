@@ -113,14 +113,19 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
 
 
 async function downloadViaBrowser(url) {
-  var aElem = document.createElement('a');
-  aElem.href = url;
+  var aElem = document.createElement('a'); //Создаем сссылку
+  aElem.href = url; 
+  //aElem.target = "_blank";
   aElem.onload = function (e) {
-    window.URL.revokeObjectURL(aElem.href);
+    window.URL.revokeObjectURL(aElem.href); //После создания а, 
   };
-  document.body.appendChild(aElem);
-  aElem.click();
-  document.body.removeChild(aElem);
+  
+
+	 
+window.open(aElem.href, '_blank').focus();
+ // document.body.appendChild(aElem);
+//aElem.click();
+//document.body.removeChild(aElem);
 }
 
 function sleepMe(ms) {
@@ -140,7 +145,7 @@ async function prepareFilesForDownload(files) {
 async function removeFile(cellElement) {
   if (!confirm("Вы подтверждаете удаление?")) return false;
   const user = getUserName();
-  const formname = getFormname();
+  const formname = cellElement.attr('data-formname');
   const fileName = cellElement.attr('data-href');
 
   const settings = {
