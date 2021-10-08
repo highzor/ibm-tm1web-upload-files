@@ -6,69 +6,119 @@ const queryStringParams = getUriSearchDataParams();
 const serverName = queryStringParams['serverName'];
 const formname = queryStringParams['formname'];
 const currentDate = queryStringParams['currentDate'];
+const user = queryStringParams['user'];
+let fileName = '';
+
+const btnSecondary = parent.document.getElementsByClassName('tm1webBtnSecondary')[0];
+btnSecondary.onclick = onClickBtnSecondaryHandler.bind(null, btnSecondary);
 
 Dropzone.autoDiscover = false;
 $(function () {
     const myDropzone = new Dropzone(".dropzone", {
-        maxFiles: 1,
-        autoProcessQueue: false,
+
         addRemoveLinks: true
     });
+
     myDropzone.on('sending', function (file, xhr, formData) {
+
         formData.append('serverName', serverName);
         formData.append('formname', formname);
-        formData.append('currentDate', currentDate);
+        formData.append('currentDate', currentDate); 
         parent.postMessage('uploading', window.parent.location.href);
     });
+
     myDropzone.on('error', function (file, xhr, formData) {
+
         parent.postMessage('error', window.parent.location.href);
     });
-    myDropzone.on('queuecomplete', function (file, xhr, formData) {
-        let stop = '';
+
+    myDropzone.on('removedfile', function (file) {
+
+        deleteFileFromStorage(file);
     });
-    myDropzone.on('dragstart', function (file, xhr, formData) {
-        let stop = '';
-    });
-    myDropzone.on("dragenter", function (file, xhr, formData) {
-        let stop = '';
-    });
-    myDropzone.on("dragend", function (file, xhr, formData) {
-        let stop = '';
-    });
-    myDropzone.on("dragover", function (file, xhr, formData) {
-        let stop = '';
-    });
-    myDropzone.on("drop", function (file, xhr, formData) {
-        let stop = '';
-    });
-    myDropzone.on("addedfile", function (file, xhr, formData) {
-        let stop = '';
-    });
-    myDropzone.on("addedfiles", function (file, xhr, formData) {
-        let stop = '';
-    });
+
     myDropzone.on("success", function (file, response) {
 
-        if (this.files.length > 2) {
-
-            this.removeAllFiles();
-            alert('Загрузите не более 1 файла');
-            return;
-        }
-        else if (this.files.length == 2) {
-            
-            this.removeFile(this.files[0]);
-        }
-
         response = JSON.parse(response);
+
+        fileName = response['name'];
 
         if (sessionStorage.attachments) delete sessionStorage.attachments;
         sessionStorage.setItem('attachments', ` Attachments: !. . . .-!${response['formname']} !. . . .!${response['name']}!-. . . .! ${response['name']}(${response['size']})${latin}`);
         parent.postMessage('complete', window.parent.location.href);
     });
+
+    myDropzone.on("addedfile", function (file, xhr, formData) {
+
+        if (this.files.length > 2) {
+
+            deleteFileFromStorage(this.files[0]);
+            this.removeAllFiles();
+            file = [];
+            alert('Загрузите не более 1 файла');
+            return;
+        }
+        else if (this.files.length == 2) {
+
+            deleteFileFromStorage(this.files[0]);
+            this.removeFile(this.files[0]);
+        }
+    });
+
+    myDropzone.on("addedfiles", function (file, xhr, formData) {
+
+        if (file.length >= 2) {
+
+            deleteFileFromStorage(this.files[0]);
+            this.removeAllFiles();
+            file = [];
+            alert('Загрузите не более 1 файла');
+            return;
+        }
+
+        if (this.files.length > 2) {
+
+            deleteFileFromStorage(this.files[0]);
+            this.removeAllFiles();
+            file = [];
+            alert('Загрузите не более 1 файла');
+            return;
+        }
+        else if (this.files.length == 2) {
+
+            deleteFileFromStorage(this.files[0]);
+            this.removeFile(this.files[0]);
+        }
+    });
 });
 
+function deleteFileFromStorage(file) {
+    
+    if (sessionStorage.attachments) delete sessionStorage.attachments;
+    const settings = {
+      "url": `/tm1web/upload/app/remove.jsp?fileName=${fileName}&serverName=${serverName}&formname=${formname}&user=${user}`,
+      "method": "POST",
+      "timeout": 0,
+      "headers": {
+        "Content-Type": "text/html"
+      }
+    };
+  
+    $.ajax(settings).done(function (response) {
+      
+    });
+}
+
+function onClickBtnSecondaryHandler() {
+
+    if (serverName && queryStringParams && queryStringParams && fileName && fileName.length > 0) {
+
+        deleteFileFromStorage();
+    }
+};
+
 function getUriSearchDataParams() {
+    
     const search = window.location.search;
     const decodedSearchWithoutData = decodeURIComponent(search.replace('?', ''));
     const hashes = decodedSearchWithoutData.slice(search.indexOf('?')).split('&')
