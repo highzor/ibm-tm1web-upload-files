@@ -149,7 +149,6 @@ async function prepareFilesForDownload(files) {
   const formname = getFormname();
 
   downloadViaBrowser(`/tm1web/upload/app/getAllFiles.jsp?fileNames=${files.join(',')}&serverName=${serverName}&formname=${formname}&user=${user}`);
-
 }
 
 async function removeFile(cellElement) {
