@@ -112,21 +112,31 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
 }
 
 
-async function downloadViaBrowser(url) {
-  var aElem = document.createElement('a'); //Создаем сссылку
-  aElem.href = url; 
-  //aElem.target = "_blank";
-  aElem.onload = function (e) {
-    window.URL.revokeObjectURL(aElem.href); //После создания а, 
-  };
+// async function downloadViaBrowser(url) {
+//   var aElem = document.createElement('a'); //Создаем сссылку
+//   aElem.href = url; 
+//   //aElem.target = "_blank";
+//   aElem.onload = function (e) {
+//     window.URL.revokeObjectURL(aElem.href); //После создания а, 
+//   };
   
+async function downloadViaBrowser(url) {
+  var aElem = document.createElement('a');
+  aElem.href = url;
+  aElem.onload = function (e) {
+    window.URL.revokeObjectURL(aElem.href);
+  };
+  document.body.appendChild(aElem);
+  aElem.click();
+  document.body.removeChild(aElem);
+}
 
 	 
-window.open(aElem.href, '_blank').focus();
+//window.open(aElem.href, '_blank').focus();
  // document.body.appendChild(aElem);
 //aElem.click();
 //document.body.removeChild(aElem);
-}
+//}
 
 function sleepMe(ms) {
   return new Promise((resolve) => {
