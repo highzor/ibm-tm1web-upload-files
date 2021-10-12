@@ -5,13 +5,8 @@ document.addEventListener("DOMContentLoaded", ready);
 
 function ready() {
 
-    const switcherEvents = (event) => {
-
-    }
-
     window.removeFile = removeFile;
     window.downloadFiles = downloadFiles;
-
 
     // 2.
     const InsertOrDeleteDomElemEventHandler = (event) => {

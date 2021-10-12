@@ -111,7 +111,6 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
 
 }
 
-
 // async function downloadViaBrowser(url) {
 //   var aElem = document.createElement('a'); //Создаем сссылку
 //   aElem.href = url; 
