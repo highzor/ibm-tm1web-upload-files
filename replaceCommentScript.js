@@ -104,6 +104,10 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
       else {
         gridScrollbox.style.overflow = 'auto';
         $(gridScrollbox).animate({ scrollTop: scrollComebackPls }, 'slow');
+        if (files.length == 0) {
+          alert('Файлов для скачивания нет');
+          return;
+        }
         prepareFilesForDownload(files);
       }
     })
