@@ -16,7 +16,7 @@ request.setCharacterEncoding("UTF-8");
 String serverName = request.getParameter("serverName");
 String formname = request.getParameter("formname");
 String user = request.getParameter("user");
-String[] fileNames = request.getParameter("fileNames").split(",");
+String[] fileNames = request.getParameter("fileNames").split("!=-=!");
 
 if (serverName != null && formname != null && fileNames.length > 0) {
 
@@ -89,8 +89,8 @@ public static String getCognosDataPath() throws Exception {
 		StringBuffer rootPath = new StringBuffer(getCognosDataPath());
 		rootPath.append(serverName);
 		rootPath.append("\\");
-		rootPath.append(formname);
-		rootPath.append("\\attachments\\");
+		// rootPath.append(formname);
+		// rootPath.append("\\attachments\\");
 		return rootPath.toString();
 	}
 	

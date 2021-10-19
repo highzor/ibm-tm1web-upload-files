@@ -92,8 +92,12 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
       const FileRemoveClass = document.getElementsByClassName('FileRemove');
 
       Array.prototype.forEach.call(FileRemoveClass, fileName => {
-        if (!files.includes(fileName.getAttribute('data-href'))) {
-          files.push(fileName.getAttribute('data-href'));
+
+        const dataHref = fileName.getAttribute('data-href');
+        const dataFormname = fileName.getAttribute('data-formname');
+
+        if (!files.includes(`${dataFormname}//attachments//${dataHref}`)) {
+          files.push(`${dataFormname}//attachments//${dataHref}`);
         }
       });
 
@@ -151,7 +155,7 @@ async function prepareFilesForDownload(files) {
   const user = getUserName();
   const formname = getFormname();
 
-  downloadViaBrowser(`/tm1web/upload/app/getAllFiles.jsp?fileNames=${files.join(',')}&serverName=${serverName}&formname=${formname}&user=${user}`);
+  downloadViaBrowser(`/tm1web/upload/app/getAllFiles.jsp?fileNames=${files.join('!=-=!')}&serverName=${serverName}&formname=${formname}&user=${user}`);
 }
 
 async function removeFile(cellElement) {
