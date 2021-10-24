@@ -93,7 +93,7 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
 
       Array.prototype.forEach.call(FileRemoveClass, fileName => {
 
-        const dataHref = fileName.getAttribute('data-href');
+        const dataHref = fileName.getAttribute('data-href').replaceAll('+', '%2b');
         const dataFormname = fileName.getAttribute('data-formname');
 
         if (!files.includes(`${dataFormname}//attachments//${dataHref}`)) {
@@ -130,6 +130,7 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
 async function downloadViaBrowser(url) {
   var aElem = document.createElement('a');
   aElem.href = url;
+  aElem.target = '_blank';
   aElem.onload = function (e) {
     window.URL.revokeObjectURL(aElem.href);
   };

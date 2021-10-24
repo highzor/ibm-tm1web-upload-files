@@ -40,21 +40,27 @@ public static void createGetZip(HttpServletResponse response, String rootPath, S
     
     for (int i=0; i<fileNames.length; i++) {
 
-    FileInputStream fis = new FileInputStream(rootPath + fileNames[i]);
-    BufferedInputStream bis = new BufferedInputStream(fis);
-
-    File file = new File(rootPath + fileNames[i]);
-    String entryname = file.getName();
-    zout.putNextEntry(new ZipEntry(entryname));
-
-    int bytesRead;
-    while ((bytesRead = bis.read(buf)) != -1) {
-    zout.write(buf, 0, bytesRead);
-    }
-
-    zout.closeEntry();
-    bis.close();
-    fis.close();
+        try {
+            
+            FileInputStream fis = new FileInputStream(rootPath + fileNames[i]);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+        
+            File file = new File(rootPath + fileNames[i]);
+            String entryname = file.getName();
+            zout.putNextEntry(new ZipEntry(entryname));
+        
+            int bytesRead;
+            while ((bytesRead = bis.read(buf)) != -1) {
+            zout.write(buf, 0, bytesRead);
+            }
+        
+            zout.closeEntry();
+            bis.close();
+            fis.close();
+               }
+               catch (Exception ex) {
+                   
+            }
     }
 
     zout.flush();
