@@ -163,7 +163,7 @@ async function removeFile(cellElement) {
   if (!confirm("Вы подтверждаете удаление?")) return false;
   const user = getUserName();
   const formname = cellElement.attr('data-formname');
-  const fileName = cellElement.attr('data-href');
+  const fileName = cellElement.attr('data-href').replaceAll('+', '%2b');
 
   const settings = {
     "url": `/tm1web/upload/app/remove.jsp?fileName=${fileName}&serverName=${serverName}&formname=${formname}&user=${user}`,
