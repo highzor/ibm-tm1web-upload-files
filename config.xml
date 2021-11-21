@@ -1,0 +1,5 @@
+<Properties>
+	<Path>\\\\srv-ibmstudsale.axapta.local\\share\\CognosData\\Production\\</Path>
+	<TM1Models>C:\\\\TM1Models\\</TM1Models>
+	<Repository>C:\\\\Program Files\\ibm\\cognos\\tm1web\\webapps\\tm1web\\upload\\repository\\</Repository>
+</Properties>

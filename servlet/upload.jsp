@@ -10,7 +10,8 @@
 <%@ page import="javax.xml.parsers.DocumentBuilder" %>
 <%@ page import="org.w3c.dom.Document" %>
 <%
-	File inputFile = new File("C:\\\\Program Files\\ibm\\cognos\\tm1web\\webapps\\tm1web\\upload\\app\\config.xml");
+    String applicationFolder = getApplicationFolder(application, request);
+	File inputFile = new File(applicationFolder + "\\config.xml");
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
     Document doc = dBuilder.parse(inputFile);
@@ -39,6 +40,16 @@
         return false;
     }
 
+    public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
+
+		String requestPath = request.getRequestURI().toString();
+		String appPath = application.getRealPath("").toString();
+		int first = requestPath.indexOf('/');
+		int second = requestPath.indexOf('/', first + 1);
+		String applicationFolder = appPath + requestPath.substring(second).replace('/', '\\');
+		applicationFolder = applicationFolder.substring(0, applicationFolder.lastIndexOf('\\'));
+		return applicationFolder;
+	}
 %>
 <%
 	request.setCharacterEncoding("UTF-8");

@@ -17,18 +17,17 @@ String serverName = request.getParameter("serverName");
 String formname = request.getParameter("formname");
 String user = request.getParameter("user");
 String[] fileNames = request.getParameter("fileNames").split("!=-=!");
+String applicationFolder = getApplicationFolder(application, request);
 
 if (serverName != null && formname != null && fileNames.length > 0) {
 
-	String rootPath = getRootPath(serverName, formname);
+	String rootPath = getRootPath(serverName, formname, applicationFolder);
 	
 	response.setContentType("application/x-msdownload");
     response.setHeader("Content-Disposition", "attachment; filename=\"MyZip.ZIP\"");
 
 	String filename = "C:\\SomeDir\\notes.txt";
 	createGetZip(response, rootPath, formname, fileNames);
-	
-
 }
 %>
 <%!
@@ -80,9 +79,8 @@ public static void createGetZip(HttpServletResponse response, String rootPath, S
     os.close();
 }
 
-
-public static String getCognosDataPath() throws Exception {
-		File inputFile = new File("C:\\\\Program Files\\ibm\\cognos\\tm1web\\webapps\\tm1web\\upload\\config.xml");
+    public static String getCognosDataPath(String applicationFolder) throws Exception {
+		File inputFile = new File(applicationFolder + "\\config.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		org.w3c.dom.Document doc = dBuilder.parse(inputFile);
@@ -91,16 +89,25 @@ public static String getCognosDataPath() throws Exception {
 		return configPath;
 	}
 
-	public static String getRootPath(String serverName, String formname) throws Exception {
-		StringBuffer rootPath = new StringBuffer(getCognosDataPath());
+    public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
+
+		String requestPath = request.getRequestURI().toString();
+		String appPath = application.getRealPath("").toString();
+		int first = requestPath.indexOf('/');
+		int second = requestPath.indexOf('/', first + 1);
+		String applicationFolder = appPath + requestPath.substring(second).replace('/', '\\');
+		applicationFolder = applicationFolder.substring(0, applicationFolder.lastIndexOf('\\'));
+		return applicationFolder;
+	}
+
+	public static String getRootPath(String serverName, String formname, String applicationFolder) throws Exception {
+		StringBuffer rootPath = new StringBuffer(getCognosDataPath(applicationFolder));
 		rootPath.append(serverName);
 		rootPath.append("\\");
-		// rootPath.append(formname);
-		// rootPath.append("\\attachments\\");
 		return rootPath.toString();
 	}
 	
 	private static String encodeValue(String value) throws Exception {
 		String encodeMe = "файлы_формы_" + value;
 		return URLEncoder.encode(encodeMe, StandardCharsets.UTF_8.toString());
-	}%>
+}%>

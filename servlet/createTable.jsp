@@ -2,6 +2,7 @@
 <%@ page import="org.jsoup.Jsoup"%>
 <%@page import="com.google.gson.Gson"%>
 <%@ page import="org.jsoup.nodes.Document"%>
+<%@ page import="java.lang.System"%>
 <%@ page import="org.jsoup.nodes.Element"%>
 <%@ page import="org.jsoup.select.Elements"%>
 <%@ page import="java.util.stream.Collectors"%>
@@ -9,6 +10,7 @@
 <%@ page import="javax.xml.parsers.DocumentBuilderFactory"%>
 <%@ page import="javax.xml.parsers.DocumentBuilder"%>
 <%@ page import="java.nio.file.Path"%>
+<%@ page import="java.nio.file.Paths"%>
 <%@ page import="java.io.InputStream"%>
 <%@ page import="java.io.*"%>
 <%@ page import="java.net.URLEncoder"%>
@@ -28,6 +30,9 @@ String user = request.getParameter("user");
 String SQL2 = "SELECT * FROM TM1_LOGS.dbo.UserForm where USERS = ? and FORM = ?";
 String url = "jdbc:sqlserver://10.40.10.138;user=TestB;password=123456789";
 String bodyRequest = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+
+String applicationFolder = getApplicationFolder(application, request);
+
 Connection con = DriverManager.getConnection(url);
 List<String> list = new ArrayList<String>();
 ResultSet rs = null;
@@ -36,44 +41,30 @@ preparedStatement.setString(1, user);
 preparedStatement.setString(2, formname);
   rs = preparedStatement.executeQuery();
    while(rs.next())
-            {
-                String name = rs.getString("USERS");
-                String id = rs.getString("FORM");
-				   String STATMEN = rs.getString("STATMEN");
-                list.add(name);
-                list.add(id); list.add(STATMEN);
-               // out.println(name+" "+id);
-            }
-			//out.println(list);
-			con.close();
+	{
+		String name = rs.getString("USERS");
+		String id = rs.getString("FORM");
+			String STATMEN = rs.getString("STATMEN");
+		list.add(name);
+		list.add(id); list.add(STATMEN);
+	}
+	con.close();
 
 
 if (serverName != null && formname != null) {
-	//Document doc = Jsoup.parse(subject);
-	//out.print(doc);
-	//out.println(serverName);
-	//out.println(formname);
-	//out.println(bodyRequest);
+
 	Document doc = Jsoup.parse(bodyRequest);
 	ReplaceHelper replacedElement = new ReplaceHelper();
-	//String rootPath = getRootPath(serverName, formname);
-	//out.println(doc);
-	//Element table = doc.select("table[class=dojoxGridRowTable]").first();
 	Elements tds = doc.select("td[idx=0]");
 	for (Element td : tds) {
-		if (td.text().lastIndexOf("!-. . . .!") != -1) {
-	//out.println(element.text());
-	//String rootPath = getRootPath(serverName, formname);
-	DocumentDTO document = new DocumentDTO(serverName, user);
-	String rootPath = getRootPath(document, serverName, td, formname);
+			if (td.text().lastIndexOf("!-. . . .!") != -1) {
+		DocumentDTO document = new DocumentDTO(serverName, user);
+		String rootPath = getRootPath(document, serverName, td, formname, applicationFolder);
 
-	replacedElement.getReplacedCell(document, td, serverName, rootPath, user);
-		}
-		//el.text("hello " + i);
-		//i++;
+		replacedElement.getReplacedCell(document, td, serverName, rootPath, user);
+			}
 	}
 
-	//out.println(td);
 	out.print(doc);
 	out.flush();
 }
@@ -84,9 +75,6 @@ if (serverName != null && formname != null) {
 		public void getReplacedCell(DocumentDTO document, Element td, String serverName, String rootPath, String user)
 				throws Exception {
 
-			//DocumentDTO document = new DocumentDTO(serverName, formname, user);
-			//String cellValue = td.text();
-			//explodeCellValue(document, cellValue);
 			boolean isExist = isFileExist(document, rootPath);
 			if (isExist) {
 				replaceDownloadAndDeleteCell(td, document);
@@ -162,10 +150,8 @@ if (serverName != null && formname != null) {
 		removeLinkElement.attr("data-href", document.FileName);
 		removeLinkElement.attr("data-formname", document.Formname);
 		removeLinkElement.attr("class", "FileRemove");
-		//removeLinkElement.attr("target", "_blank");
 		removeLinkElement.attr("href", "javascript:;");
 		removeLinkElement.attr("style", "color:red");
-		//removeLinkElement.attr("onClick", "return confirm('Вы подтверждаете удаление?');");
 		removeLinkElement.attr("onClick", "removeFile($(this));");
 		removeLinkElement.text("x Удалить");
 
@@ -209,8 +195,9 @@ if (serverName != null && formname != null) {
 		td.appendText(" - " + document.FileNameAndSize);
 	}
 
-	public static String getCognosDataPath() throws Exception {
-		File inputFile = new File("C:\\\\Program Files\\ibm\\cognos\\tm1web\\webapps\\tm1web\\upload\\config.xml");
+	public static String getCognosDataPath(String applicationFolder) throws Exception {
+		
+		File inputFile = new File(applicationFolder + "\\config.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		org.w3c.dom.Document doc = dBuilder.parse(inputFile);
@@ -218,37 +205,29 @@ if (serverName != null && formname != null) {
 		String configPath = doc.getElementsByTagName("Path").item(0).getTextContent();
 		return configPath;
 	}
-	/*
-	public static String getFilePath(DocumentDTO document) throws Exception {
-		StringBuffer filePath = new StringBuffer(getCognosDataPath());
-		filePath.append(document.ServerName);
-		filePath.append("\\");
-		filePath.append(document.Formname);
-		filePath.append("\\attachments\\");
-		return filePath.toString();
-	}
-	*/
 
-	public static String getRootPath(DocumentDTO document, String serverName, Element td, String formname) throws Exception {
+	public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
+
+		String requestPath = request.getRequestURI().toString();
+		String appPath = application.getRealPath("").toString();
+		int first = requestPath.indexOf('/');
+		int second = requestPath.indexOf('/', first + 1);
+		String applicationFolder = appPath + requestPath.substring(second).replace('/', '\\');
+		applicationFolder = applicationFolder.substring(0, applicationFolder.lastIndexOf('\\'));
+		return applicationFolder;
+	}
+
+	public static String getRootPath(DocumentDTO document, String serverName, Element td, String formname, String applicationFolder) throws Exception {
 
 		String cellValue = td.text();
 		explodeCellValue(document, cellValue, formname);
-		StringBuffer rootPath = new StringBuffer(getCognosDataPath());
+		StringBuffer rootPath = new StringBuffer(getCognosDataPath(applicationFolder));
 		rootPath.append(serverName);
 		rootPath.append("\\");
 		rootPath.append(document.Formname);
 		rootPath.append("\\attachments\\");
 		return rootPath.toString();
 	}
-
-	// public static String getRootPath(String serverName, String formname) throws Exception {
-	// 	StringBuffer rootPath = new StringBuffer(getCognosDataPath());
-	// 	rootPath.append(serverName);
-	// 	rootPath.append("\\");
-	// 	rootPath.append(formname);
-	// 	rootPath.append("\\attachments\\");
-	// 	return rootPath.toString();
-	// }
 
 	public static User searchRemovedFile(String rootPath, String searchedFileName) throws Exception {
 		User user = new User();
@@ -282,13 +261,6 @@ if (serverName != null && formname != null) {
 		String datetime;
 		String name;
 		String ErrorMessage;
-		/*
-		public User(String user, String datetime, String name) {
-			this.user = user;
-			this.datetime = datetime;
-			this.name = name;
-		}
-		*/
 	}
 
 	public class DocumentDTO {
@@ -303,13 +275,6 @@ if (serverName != null && formname != null) {
 			this.ServerName = serverName;
 			this.User = user;
 		}
-
-		// public DocumentDTO(String serverName, String formname, String user) {
-		// 	this.ServerName = serverName;
-		// 	this.Formname = formname;
-		// 	this.User = user;
-		// }
-
 	}
 
 	private static String encodeValue(String value) throws Exception {
