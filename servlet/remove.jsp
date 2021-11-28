@@ -13,6 +13,7 @@
 <%@ page import="java.nio.charset.StandardCharsets" %>
 <%@ page import="java.util.Arrays" %>
 <%
+    // удаление файла из хранилища Cognos
     String applicationFolder = getApplicationFolder(application, request);
 	File inputFile = new File(applicationFolder + "\\config.xml");
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -27,7 +28,7 @@
     String logFileName = "remove.txt";
     Date currDate = new Date();
     SimpleDateFormat formatForCurrDate = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss");
-
+    // собираем данные из 'request
     String fileName = request.getParameter("fileName");
     String serverName = request.getParameter("serverName");
     Path path = Paths.get(configPath + serverName + "\\" +formname +   "\\attachments\\" + fileName);
@@ -56,7 +57,7 @@
     public static String removeLastChar(String s) {
 		return (s == null || s.length() == 0) ? null : (s.substring(0, s.length() - 1));
 	}
-
+    // метод формирования пути, откуда запускается текущий '.jsp'
     public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
 
 		String requestPath = request.getRequestURI().toString();

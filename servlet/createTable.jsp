@@ -23,6 +23,7 @@
 <%@ page import="java.util.List" %>
 
 <%
+// собираем данные из 'request'
 request.setCharacterEncoding("UTF-8");
 String serverName = request.getParameter("serverName");
 String formname = request.getParameter("formname");
@@ -30,7 +31,7 @@ String user = request.getParameter("user");
 String SQL2 = "SELECT * FROM TM1_LOGS.dbo.UserForm where USERS = ? and FORM = ?";
 String url = "jdbc:sqlserver://10.40.10.138;user=TestB;password=123456789";
 String bodyRequest = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-
+// получаем путь до файла с конфигурацией
 String applicationFolder = getApplicationFolder(application, request);
 
 Connection con = DriverManager.getConnection(url);
@@ -53,15 +54,18 @@ preparedStatement.setString(2, formname);
 
 if (serverName != null && formname != null) {
 
+	// парсим тело запроса (html таблица с комментариями)
 	Document doc = Jsoup.parse(bodyRequest);
 	ReplaceHelper replacedElement = new ReplaceHelper();
 	Elements tds = doc.select("td[idx=0]");
+	// обрабатываем каждую строчку таблицы комментариев
 	for (Element td : tds) {
 			if (td.text().lastIndexOf("!-. . . .!") != -1) {
-		DocumentDTO document = new DocumentDTO(serverName, user);
-		String rootPath = getRootPath(document, serverName, td, formname, applicationFolder);
 
-		replacedElement.getReplacedCell(document, td, serverName, rootPath, user);
+				DocumentDTO document = new DocumentDTO(serverName, user);
+				String rootPath = getRootPath(document, serverName, td, formname, applicationFolder);
+
+				replacedElement.getReplacedCell(document, td, serverName, rootPath, user);
 			}
 	}
 
@@ -71,7 +75,7 @@ if (serverName != null && formname != null) {
 %>
 
 <%!public class ReplaceHelper {
-		//Step 1
+		// метод получения переписанной строки таблицы html
 		public void getReplacedCell(DocumentDTO document, Element td, String serverName, String rootPath, String user)
 				throws Exception {
 
@@ -85,7 +89,7 @@ if (serverName != null && formname != null) {
 
 	}
 
-	//Step 2
+	// формируем объект 'DocumentDTO' из строки комментария для манипуляций
 	public static DocumentDTO explodeCellValue(DocumentDTO document, String value, String formname) {
 		String[] array = value.split(". . . . . . . . . . . . . . . .");
 		String[] array2 = array[0].split("!-. . . .!");
@@ -108,7 +112,7 @@ if (serverName != null && formname != null) {
 		return document;
 	}
 
-	//Step 3
+	// файл существует?
 	public static boolean isFileExist(DocumentDTO document, String rootPath) throws Exception {
 		StringBuffer filePath = new StringBuffer(rootPath);
 		filePath.append(document.FileName);
@@ -119,7 +123,7 @@ if (serverName != null && formname != null) {
 		return false;
 	}
 
-	//Step 4
+	// метод формирования и возврат переписанных строк таблицы с ссылками на скачивание/удаление файла
 	public static void replaceDownloadAndDeleteCell(Element td, DocumentDTO document) throws Exception {
 		StringBuffer urlDownload = new StringBuffer("/tm1web/upload/app/getfile.jsp?");
 		StringBuffer urlRemove = new StringBuffer("/tm1web/upload/app/remove.jsp?");
@@ -166,7 +170,7 @@ if (serverName != null && formname != null) {
 		td.appendChild(span);
 		td.appendText(document.FileNameAndSize);
 	}
-
+	// метод получения строки таблицы комментариев, файлы которых удалены из хранилища
 	public static void replaceDeletedCell(Element td, DocumentDTO document, String rootPath) throws Exception {
 
 		User whoIsDeletedFile = searchRemovedFile(rootPath, document.FileName);
@@ -195,6 +199,7 @@ if (serverName != null && formname != null) {
 		td.appendText(" - " + document.FileNameAndSize);
 	}
 
+	// парсим параметр 'Path' из 'config.xml'
 	public static String getCognosDataPath(String applicationFolder) throws Exception {
 		
 		File inputFile = new File(applicationFolder + "\\config.xml");
@@ -206,6 +211,7 @@ if (serverName != null && formname != null) {
 		return configPath;
 	}
 
+	// метод формирования пути, откуда запускается текущий '.jsp'
 	public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
 
 		String requestPath = request.getRequestURI().toString();
@@ -217,6 +223,7 @@ if (serverName != null && formname != null) {
 		return applicationFolder;
 	}
 
+	// метод получения пути к хранилищу Cognos
 	public static String getRootPath(DocumentDTO document, String serverName, Element td, String formname, String applicationFolder) throws Exception {
 
 		String cellValue = td.text();
@@ -229,6 +236,7 @@ if (serverName != null && formname != null) {
 		return rootPath.toString();
 	}
 
+	// метод поиска удаленного файла
 	public static User searchRemovedFile(String rootPath, String searchedFileName) throws Exception {
 		User user = new User();
 		StringBuffer logFile = new StringBuffer(rootPath);

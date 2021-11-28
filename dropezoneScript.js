@@ -1,3 +1,4 @@
+// 1. функция добавления dropeZone
 function insertDropezone(modalWindow, btnPrimary) {
 
     const btnPrimaryClass = document.getElementsByClassName('tm1WebBtnPrimary')[0];
@@ -7,7 +8,7 @@ function insertDropezone(modalWindow, btnPrimary) {
     modalWindow.appendChild(iframe);
     setUploadListener(btnPrimary, btnPrimaryClass);
 }
-
+// 4. функция блокировки/разблокировки кнопки ОК
 function onMessageUploadListener(btnPrimary, btnPrimaryClass, event) {
 
     if (event.data == 'uploading') {
@@ -27,7 +28,7 @@ function onMessageUploadListener(btnPrimary, btnPrimaryClass, event) {
         }
     }
 }
-
+// удаляем слушателя на удаление модального окна
 function removeUploadListener(modalWindow) {
 
     if (modalWindow) return;
@@ -36,7 +37,7 @@ function removeUploadListener(modalWindow) {
     document.body.removeEventListener("DOMNodeRemoved", removeUploadListener, false);
     console.log('событие на сообщение удалено');
 }
-
+// 5. функция сохранения комментария, содержащего сообщение пользователя + имя подгруженного файла
 function onClickBtnPrimaryHandler(btnPrimary, btnPrimaryClass) {
 
     if (btnPrimaryClass.className.includes('dijitButtonDisabled')) return;
@@ -54,14 +55,14 @@ function onClickBtnPrimaryHandler(btnPrimary, btnPrimaryClass) {
     });
     delete sessionStorage.attachments;
 }
-
+// 3. функция обработки клика ОК после подгрузки файла
 function setUploadListener(btnPrimary, btnPrimaryClass) {
 
     window.onmessage = onMessageUploadListener.bind(null, btnPrimary, btnPrimaryClass);
     btnPrimary.onclick = onClickBtnPrimaryHandler.bind(null, btnPrimary, btnPrimaryClass);
     console.log('событие на сообщение установлено');
 }
-
+// 2. создаем iframe, куда подгружаем файл
 function createGetIframe() {
 
     const currentDate = new Date();

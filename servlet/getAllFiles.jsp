@@ -12,6 +12,7 @@
 <%@ page import="java.util.zip.*"%>
 <%@ page import="java.net.URLEncoder"%>
 <%
+// собираем данные из 'request'
 request.setCharacterEncoding("UTF-8");
 String serverName = request.getParameter("serverName");
 String formname = request.getParameter("formname");
@@ -31,6 +32,7 @@ if (serverName != null && formname != null && fileNames.length > 0) {
 }
 %>
 <%!
+// метод создания '.zip' файла
 public static void createGetZip(HttpServletResponse response, String rootPath, String formname, String[] fileNames) throws Exception {
 	byte[] buf = new byte[2048];
 
@@ -79,6 +81,7 @@ public static void createGetZip(HttpServletResponse response, String rootPath, S
     os.close();
 }
 
+    // парсим параметр 'Path' из 'config.xml'
     public static String getCognosDataPath(String applicationFolder) throws Exception {
 		File inputFile = new File(applicationFolder + "\\config.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -89,6 +92,7 @@ public static void createGetZip(HttpServletResponse response, String rootPath, S
 		return configPath;
 	}
 
+    // метод формирования пути, откуда запускается текущий '.jsp'
     public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
 
 		String requestPath = request.getRequestURI().toString();
@@ -100,6 +104,7 @@ public static void createGetZip(HttpServletResponse response, String rootPath, S
 		return applicationFolder;
 	}
 
+    // метод получения пути к хранилищу Cognos
 	public static String getRootPath(String serverName, String formname, String applicationFolder) throws Exception {
 		StringBuffer rootPath = new StringBuffer(getCognosDataPath(applicationFolder));
 		rootPath.append(serverName);

@@ -1,9 +1,10 @@
+// 1. функция, переписывающая стандартное окно с комментариями
 function replaceComments(gridContent, tm1webDialogButtons) {
 
   gridContent.addEventListener("DOMNodeInserted", InsertPresentationRoleElemHandler, false);
   appendDownloadAllButton(tm1webDialogButtons);
 }
-
+// 2. ждем подгрузку контента
 function InsertPresentationRoleElemHandler() {
   const gridContent = document.getElementsByClassName('dojoxGridContent')[0];
   if (gridContent && gridContent.children.length > 0) {
@@ -12,7 +13,7 @@ function InsertPresentationRoleElemHandler() {
     gridContent.removeEventListener("DOMNodeInserted", InsertPresentationRoleElemHandler, false);
   }
 }
-
+// 3. добавляем кнопку загрузки всех файлов в '.zip'
 async function appendDownloadAllButton(tm1webDialogButtons) {
   const divTemp = document.createElement('div');
   divTemp.innerHTML = `<span onclick="downloadFiles();" class="dijit dijitReset dijitInline tm1webButton tm1webBtnSecondary dijitButton" 
@@ -29,7 +30,7 @@ async function appendDownloadAllButton(tm1webDialogButtons) {
 
   tm1webDialogButtons.appendChild(divTemp.firstElementChild);
 }
-
+// функция, отправляющая в 'createTable.jsp' стандартную таблицу с комментариями для преобразования
 async function replaceTable() {
   const user = getUserName();
   const formname = getFormname();
@@ -54,18 +55,18 @@ async function replaceTable() {
     gridContent.addEventListener("DOMNodeInserted", InsertPresentationRoleElemHandler, false);
   });
 }
-
+// функция, дающая возможность копирования текста в окне комментариев
 async function setAbleToCopyFields() {
   const tm1webAnnotationGrid = document.getElementsByClassName('dojoxGrid tm1webAnnotationGrid')[0];
   tm1webAnnotationGrid.style.userSelect = 'auto';
 }
-
+// функция скачивания всех файлов в '.zip'
 async function downloadFiles() {
   const gridScrollbox = document.getElementsByClassName('dojoxGridScrollbox')[0];
   gridScrollbox.style.overflow = 'hidden';
   replayMe(null, gridScrollbox, false, null);
 }
-
+// функция автоксролла окна с комментариями, перед тем как 'скачать все', все комментарии д.б. прогружены
 async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls) {
   if (!wasCalledToTop) {
     scrollComebackPls = gridScrollbox.scrollTop;
@@ -118,15 +119,7 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
   });
 
 }
-
-// async function downloadViaBrowser(url) {
-//   var aElem = document.createElement('a'); //Создаем сссылку
-//   aElem.href = url; 
-//   //aElem.target = "_blank";
-//   aElem.onload = function (e) {
-//     window.URL.revokeObjectURL(aElem.href); //После создания а, 
-//   };
-  
+// функция загрузки файлов через окно браузера
 async function downloadViaBrowser(url) {
   var aElem = document.createElement('a');
   aElem.href = url;
@@ -139,26 +132,19 @@ async function downloadViaBrowser(url) {
   document.body.removeChild(aElem);
 }
 
-	 
-//window.open(aElem.href, '_blank').focus();
- // document.body.appendChild(aElem);
-//aElem.click();
-//document.body.removeChild(aElem);
-//}
-
 function sleepMe(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
-
+// подготовка всех существующих файлов в окне с комментариями для скачивания разом в '.zip'
 async function prepareFilesForDownload(files) {
   const user = getUserName();
   const formname = getFormname();
 
   downloadViaBrowser(`/tm1web/upload/app/getAllFiles.jsp?fileNames=${files.join('!=-=!')}&serverName=${serverName}&formname=${formname}&user=${user}`);
 }
-
+// функция удаления файла
 async function removeFile(cellElement) {
   if (!confirm("Вы подтверждаете удаление?")) return false;
   const user = getUserName();
@@ -177,7 +163,7 @@ async function removeFile(cellElement) {
     alert('Файл удален!');
   });
 }
-
+// добавляем пояснение к удаленному файлу
 async function replaceCell(fileInfo) {
   $(`[data-filename-log="${fileInfo.name}"]`)
     .html(`<br>

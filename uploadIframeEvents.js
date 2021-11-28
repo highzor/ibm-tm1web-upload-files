@@ -8,10 +8,10 @@ const formname = queryStringParams['formname'];
 const currentDate = queryStringParams['currentDate'];
 const user = queryStringParams['user'];
 let fileName = '';
-
+// удаляем файл при нажатии 'Отмена'
 const btnSecondary = parent.document.getElementsByClassName('tm1webBtnSecondary')[0];
 btnSecondary.onclick = onClickBtnSecondaryHandler.bind(null, btnSecondary);
-
+// подгружаем файл
 Dropzone.autoDiscover = false;
 $(function () {
     const myDropzone = new Dropzone(".dropzone", {
@@ -91,7 +91,7 @@ $(function () {
         }
     });
 });
-
+// функция удаления файла
 function deleteFileFromStorage(file) {
     
     if (sessionStorage.attachments) delete sessionStorage.attachments;
@@ -108,7 +108,7 @@ function deleteFileFromStorage(file) {
       
     });
 }
-
+// удаляем файл при нажатии 'Отмена'
 function onClickBtnSecondaryHandler() {
 
     if (serverName && queryStringParams && queryStringParams && fileName && fileName.length > 0) {
@@ -116,7 +116,7 @@ function onClickBtnSecondaryHandler() {
         deleteFileFromStorage();
     }
 };
-
+// получаем параметры из url'а
 function getUriSearchDataParams() {
     
     const search = window.location.search;

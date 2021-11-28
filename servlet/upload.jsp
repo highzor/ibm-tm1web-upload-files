@@ -10,6 +10,7 @@
 <%@ page import="javax.xml.parsers.DocumentBuilder" %>
 <%@ page import="org.w3c.dom.Document" %>
 <%
+    // загрузка файла в хранилище Cognos
     String applicationFolder = getApplicationFolder(application, request);
 	File inputFile = new File(applicationFolder + "\\config.xml");
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -39,7 +40,7 @@
         }
         return false;
     }
-
+    // метод формирования пути, откуда запускается текущий '.jsp'
     public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
 
 		String requestPath = request.getRequestURI().toString();
