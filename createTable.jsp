@@ -154,8 +154,8 @@ if (serverName != null && formname != null) {
 			Element removeLinkElement = new Element("a");
 
 			removeLinkElement.attr("id", "removeButton");
-			// removeLinkElement.attr("data-href", document.FileName);
-			// removeLinkElement.attr("data-formname", document.Formname);
+			removeLinkElement.attr("data-href", document.FileName);
+			removeLinkElement.attr("data-formname", document.Formname);
 			removeLinkElement.attr("class", "FileRemove");
 			removeLinkElement.attr("href", "javascript:;");
 			removeLinkElement.attr("style", "color:red");
