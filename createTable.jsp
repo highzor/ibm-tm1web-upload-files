@@ -1,6 +1,7 @@
 <%@ page import="java.util.*" pageEncoding="UTF-8"%>
 <%@ page import="org.jsoup.Jsoup"%>
-<%@page import="com.google.gson.Gson"%>
+<%@ page import="com.google.gson.Gson"%>
+<%@ page import="com.google.gson.stream.JsonReader"%>
 <%@ page import="org.jsoup.nodes.Document"%>
 <%@ page import="java.lang.System"%>
 <%@ page import="org.jsoup.nodes.Element"%>
@@ -29,27 +30,11 @@ String serverName = request.getParameter("serverName");
 String formname = request.getParameter("formname");
 String user = request.getParameter("user");
 String SQL2 = "SELECT * FROM TM1_LOGS.dbo.UserForm where USERS = ? and FORM = ?";
-String url = "jdbc:sqlserver://10.40.10.138;user=TestB;password=123456789";
+String url = "jdbc:sqlserver://10.40.1.6;user=sa;password=12345678";
 String bodyRequest = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 // получаем путь до файла с конфигурацией
 String applicationFolder = getApplicationFolder(application, request);
 
-Connection con = DriverManager.getConnection(url);
-List<String> list = new ArrayList<String>();
-ResultSet rs = null;
-PreparedStatement preparedStatement = con.prepareStatement(SQL2);
-preparedStatement.setString(1, user);
-preparedStatement.setString(2, formname);
-  rs = preparedStatement.executeQuery();
-   while(rs.next())
-	{
-		String name = rs.getString("USERS");
-		String id = rs.getString("FORM");
-			String STATMEN = rs.getString("STATMEN");
-		list.add(name);
-		list.add(id); list.add(STATMEN);
-	}
-	con.close();
 
 
 if (serverName != null && formname != null) {
@@ -57,16 +42,22 @@ if (serverName != null && formname != null) {
 	// парсим тело запроса (html таблица с комментариями)
 	Document doc = Jsoup.parse(bodyRequest);
 	ReplaceHelper replacedElement = new ReplaceHelper();
-	Elements tds = doc.select("td[idx=0]");
+	Elements tdsWithFileName = doc.select("td[idx=0]");
+	Elements tdsWithAuthorName = doc.select("td[idx=1]");
+	Organizations[] organizationsAccess = getAdminAccess(applicationFolder);
 	// обрабатываем каждую строчку таблицы комментариев
-	for (Element td : tds) {
-			if (td.text().lastIndexOf("!-. . . .!") != -1) {
+	for (int i = 0; i < tdsWithFileName.size(); i++) {
+		
+		Element tdWithFileName = tdsWithFileName.get(i);
 
-				DocumentDTO document = new DocumentDTO(serverName, user);
-				String rootPath = getRootPath(document, serverName, td, formname, applicationFolder);
+		if (tdWithFileName.text().lastIndexOf("!-. . . .!") != -1) {
 
-				replacedElement.getReplacedCell(document, td, serverName, rootPath, user);
-			}
+				String authorName = tdsWithAuthorName.get(i).text();
+				DocumentDTO document = new DocumentDTO(serverName, user, authorName);
+				String rootPath = getRootPath(document, serverName, tdWithFileName, formname, applicationFolder);
+
+				replacedElement.getReplacedCell(document, tdWithFileName, serverName, rootPath, user, organizationsAccess);
+		}
 	}
 
 	out.print(doc);
@@ -76,12 +67,12 @@ if (serverName != null && formname != null) {
 
 <%!public class ReplaceHelper {
 		// метод получения переписанной строки таблицы html
-		public void getReplacedCell(DocumentDTO document, Element td, String serverName, String rootPath, String user)
+		public void getReplacedCell(DocumentDTO document, Element td, String serverName, String rootPath, String user, Organizations[] organizationsAccess)
 				throws Exception {
 
 			boolean isExist = isFileExist(document, rootPath);
 			if (isExist) {
-				replaceDownloadAndDeleteCell(td, document);
+				replaceDownloadAndDeleteCell(td, document, user, organizationsAccess);
 			} else {
 				replaceDeletedCell(td, document, rootPath);
 			}
@@ -124,7 +115,9 @@ if (serverName != null && formname != null) {
 	}
 
 	// метод формирования и возврат переписанных строк таблицы с ссылками на скачивание/удаление файла
-	public static void replaceDownloadAndDeleteCell(Element td, DocumentDTO document) throws Exception {
+	public static void replaceDownloadAndDeleteCell(Element td, DocumentDTO document, String user, Organizations[] organizationsAccess) throws Exception {
+
+		boolean canDeleteCurrentFile = checkDeleteAble(document.AuthorName, user, organizationsAccess);
 		StringBuffer urlDownload = new StringBuffer("/tm1web/upload/app/getfile.jsp?");
 		StringBuffer urlRemove = new StringBuffer("/tm1web/upload/app/remove.jsp?");
 		StringBuffer urlParameters = new StringBuffer();
@@ -143,28 +136,36 @@ if (serverName != null && formname != null) {
 		Element span = new Element("span");
 		Element br = new Element("br");
 		Element downloadLinkElement = new Element("a");
-		Element removeLinkElement = new Element("a");
 
 		downloadLinkElement.attr("id", "downloadButton");
+		downloadLinkElement.attr("class", "FileDownload");
 		downloadLinkElement.attr("href", urlDownload.toString());
+		downloadLinkElement.attr("data-href", document.FileName);
+		downloadLinkElement.attr("data-formname", document.Formname);
 		downloadLinkElement.attr("target", "_blank");
-		downloadLinkElement.text("Скачать");
-
-		removeLinkElement.attr("id", "removeButton");
-		removeLinkElement.attr("data-href", document.FileName);
-		removeLinkElement.attr("data-formname", document.Formname);
-		removeLinkElement.attr("class", "FileRemove");
-		removeLinkElement.attr("href", "javascript:;");
-		removeLinkElement.attr("style", "color:red");
-		removeLinkElement.attr("onClick", "removeFile($(this));");
-		removeLinkElement.text("x Удалить");
+		downloadLinkElement.text("Скачать ");
 
 		span.attr("data-filename-log", document.FileName);
 		span.appendChild(br);
 		span.appendChild(downloadLinkElement);
-		span.appendText(" (");
-		span.appendChild(removeLinkElement);
-		span.appendText(") ");
+
+		if (canDeleteCurrentFile == true) {
+
+			Element removeLinkElement = new Element("a");
+
+			removeLinkElement.attr("id", "removeButton");
+			// removeLinkElement.attr("data-href", document.FileName);
+			// removeLinkElement.attr("data-formname", document.Formname);
+			removeLinkElement.attr("class", "FileRemove");
+			removeLinkElement.attr("href", "javascript:;");
+			removeLinkElement.attr("style", "color:red");
+			removeLinkElement.attr("onClick", "removeFile($(this));");
+			removeLinkElement.text("x Удалить");
+
+			span.appendText(" (");
+			span.appendChild(removeLinkElement);
+			span.appendText(") ");
+		}
 
 		td.text(document.Message);
 		td.appendChild(span);
@@ -202,13 +203,58 @@ if (serverName != null && formname != null) {
 	// парсим параметр 'Path' из 'config.xml'
 	public static String getCognosDataPath(String applicationFolder) throws Exception {
 		
-		File inputFile = new File(applicationFolder + "\\config.xml");
+		File configFile = new File(applicationFolder + "\\config.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		org.w3c.dom.Document doc = dBuilder.parse(inputFile);
+		org.w3c.dom.Document doc = dBuilder.parse(configFile);
 		doc.getDocumentElement().normalize();
 		String configPath = doc.getElementsByTagName("Path").item(0).getTextContent();
 		return configPath;
+	}
+
+	// может ли пользователь удалить файл
+	public static boolean checkDeleteAble(String documentAuthor, String userName, Organizations[] organizationsAccess) throws Exception {
+		
+		if (documentAuthor.equals(userName)) {
+
+			return true;
+		}
+
+		String organizationUser = "";
+		String loginUser = "";
+		
+		if (userName.contains("/")) {
+
+			String[] splittedUserData = userName.split("/");
+			organizationUser = splittedUserData[0];
+			loginUser = splittedUserData[1];
+		}
+		else if (userName.contains(":")) {
+
+			String[] splittedUserData = userName.split(":");
+			organizationUser = splittedUserData[0];
+			loginUser = splittedUserData[1];
+		}
+		else {
+
+			loginUser = userName;
+		}
+
+		for (Organizations organizationItem : organizationsAccess) {
+
+			if (organizationItem.Organization.equals(organizationUser)) {
+
+				for (Employee employee : organizationItem.Employees) {
+
+					if (employee.Login.equals(loginUser) && employee.IsAdmin == true) {
+
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	// метод формирования пути, откуда запускается текущий '.jsp'
@@ -234,6 +280,21 @@ if (serverName != null && formname != null) {
 		rootPath.append(document.Formname);
 		rootPath.append("\\attachments\\");
 		return rootPath.toString();
+	}
+
+	// метод получения компаний с работниками
+	public static Organizations[] getAdminAccess(String applicationFolder) throws Exception {
+		StringBuffer securityAccessFile = new StringBuffer(applicationFolder);
+		securityAccessFile.append("\\access\\securityAccess.json");
+		try {
+			Gson gson = new Gson();
+			JsonReader reader = new JsonReader(new FileReader(securityAccessFile.toString()));
+			Organizations[] organizationsAccess = gson.fromJson(reader, Organizations[].class);
+			return organizationsAccess;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	// метод поиска удаленного файла
@@ -278,11 +339,24 @@ if (serverName != null && formname != null) {
 		String FileNameAndSize;
 		String Message;
 		String User;
+		String AuthorName;
 
-		public DocumentDTO(String serverName, String user) {
+		public DocumentDTO(String serverName, String user, String authorName) {
 			this.ServerName = serverName;
 			this.User = user;
+			this.AuthorName = authorName;
 		}
+	}
+
+	public class Employee {
+		public String Login;
+		public boolean IsAdmin;
+	}
+	
+	public static class Organizations {
+		public String Organization;
+		public ArrayList<Employee> Employees;
+		public String ErrorMessage;
 	}
 
 	private static String encodeValue(String value) throws Exception {

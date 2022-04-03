@@ -15,7 +15,6 @@
 <%@ page import="java.net.URLEncoder" %>
 <%
     // '.jsp' скачивающий файл
-	// загрузка файла в хранилище Cognos
     String applicationFolder = getApplicationFolder(application, request);
 	File inputFile = new File(applicationFolder + "\\config.xml");
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();

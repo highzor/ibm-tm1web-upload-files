@@ -1,0 +1,28 @@
+[
+    {
+        "Organization": "COMPANY1",
+        "Employees": [
+            {
+                "Login": "Vasilev Nikita",
+                "IsAdmin": true
+            },
+            {
+                "Login": "Ershova Olga",
+                "IsAdmin": true
+            }
+        ]
+    },
+    {
+        "Organization": "COMPANY2",
+        "Employees": [
+            {
+                "Login": "Vasileva Katya",
+                "IsAdmin": true
+            },
+            {
+                "Login": "Egorov Oleg",
+                "IsAdmin": true
+            }
+        ]
+    }
+]

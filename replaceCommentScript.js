@@ -90,9 +90,9 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
 
       let scrollAfterValue = gridScrollbox.scrollTop;
 
-      const FileRemoveClass = document.getElementsByClassName('FileRemove');
+      const FileClass = document.getElementsByClassName('FileDownload');
 
-      Array.prototype.forEach.call(FileRemoveClass, fileName => {
+      Array.prototype.forEach.call(FileClass, fileName => {
 
         const dataHref = fileName.getAttribute('data-href').replaceAll('+', '%2b');
         const dataFormname = fileName.getAttribute('data-formname');
@@ -173,7 +173,7 @@ async function replaceCell(fileInfo) {
 }
 
 function getUserName() {
-  const userName = $('#ibm-banner-welcome').text();
+  const userName = $('#ibm-banner-welcome').text().split(' / ')[0];
   return userName;
 }
 

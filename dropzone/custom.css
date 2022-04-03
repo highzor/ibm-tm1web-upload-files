@@ -1,0 +1,27 @@
+.dropzone {
+    border: 2px dashed rgba(0, 0, 0, 0.3);
+    font-family: "Open Sans", "Tahoma", sans-serif;
+    min-height: 130px;
+    padding: 10px;
+}
+.dropzone:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+.dropzone .dz-preview {
+    width: 80px;
+    min-height: 80px;
+}
+.dropzone .dz-preview .dz-image {
+    width: 80px;
+    height: 80px;
+}
+.dropzone .dz-preview.dz-file-preview .dz-image {
+    border-radius: 10px;
+}
+.dropzone .dz-preview .dz-details .dz-size {
+    margin-bottom: 0em;
+    font-size: 12px;
+}
+.dropzone .dz-preview .dz-details {
+    padding: 11px 5px;
+}

@@ -67,7 +67,7 @@ function createGetIframe() {
 
     const currentDate = new Date();
     const formname = $('.dijitTabInner.dijitTabContent.dijitClosable.dijitTab.dijitTabChecked.dijitChecked').find($('.dijitTabLabel')).attr("title").split(': ').pop();
-    const userName = $('#ibm-banner-welcome').text();
+    const userName = $('#ibm-banner-welcome').text().split(' / ')[0];
     const iframe = document.createElement('iframe');
     iframe.style.border = '0px';
     iframe.style.height = '130px';
