@@ -15,7 +15,9 @@
 <%@ page import="java.net.URLEncoder" %>
 <%
     // '.jsp' скачивающий файл
-	File inputFile = new File("C:\\\\Program Files\\ibm\\cognos\\tm1web\\webapps\\tm1web\\upload\\app\\config.xml");
+	// загрузка файла в хранилище Cognos
+    String applicationFolder = getApplicationFolder(application, request);
+	File inputFile = new File(applicationFolder + "\\config.xml");
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
     Document doc = dBuilder.parse(inputFile);
@@ -41,4 +43,18 @@
     fileInputStream.close();
     os1.flush();
     os1.close();
+%>
+
+<%!
+    // метод формирования пути, откуда запускается текущий '.jsp'
+    public static String getApplicationFolder(ServletContext application, HttpServletRequest request) throws Exception {
+
+		String requestPath = request.getRequestURI().toString();
+		String appPath = application.getRealPath("").toString();
+		int first = requestPath.indexOf('/');
+		int second = requestPath.indexOf('/', first + 1);
+		String applicationFolder = appPath + requestPath.substring(second).replace('/', '\\');
+		applicationFolder = applicationFolder.substring(0, applicationFolder.lastIndexOf('\\'));
+		return applicationFolder;
+	}
 %>
