@@ -123,13 +123,15 @@ async function replayMe(files, gridScrollbox, wasCalledToTop, scrollComebackPls)
 async function downloadViaBrowser(url) {
   var aElem = document.createElement('a');
   aElem.href = url;
-  aElem.target = '_blank';
+  // aElem.target = '_blank';
+  aElem.target = '_self';
   aElem.onload = function (e) {
     window.URL.revokeObjectURL(aElem.href);
   };
   document.body.appendChild(aElem);
   aElem.click();
   document.body.removeChild(aElem);
+  //document.getElementsByClassName('dijit dijitReset dijitInline tm1webButton dijitButton')[0].childNodes[0].click();
 }
 
 function sleepMe(ms) {
